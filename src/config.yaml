@@ -1,0 +1,9 @@
+regions:
+  main_area:
+    points:
+      - [800, 50]
+      - [1000, 50]
+      - [1000, 700]
+      - [800, 700]
+    padding: 1000  # 擴展區域的像素數
+    enabled: true
