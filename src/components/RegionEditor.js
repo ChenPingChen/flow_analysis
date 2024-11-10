@@ -26,36 +26,32 @@ function RegionEditor() {
     }
   }, [location.state]);
 
-  useEffect(() => {
-    const loadInitialConfig = async () => {
-      try {
-        const configData = await loadConfig();
-        console.log('Loaded config:', configData);
-        
-        if (configData?.zones) {
-          const loadedRegions = Object.entries(configData.zones).map(([id, zone]) => ({
-            id,
-            points: zone.points.reduce((acc, point) => [...acc, ...point], []),
-            isDragging: false,
-            enabled: zone.enabled,
-            padding: zone.padding
-          }));
-          console.log('Loaded regions:', loadedRegions);
-          setRegions(loadedRegions);
-        }
-      } catch (error) {
-        console.error('Error loading config:', error);
+  const loadInitialConfig = async () => {
+    try {
+      const configData = await loadConfig();
+      console.log('Loaded config:', configData);
+
+      if (configData?.regions) {
+        const loadedRegions = Object.entries(configData.regions).map(([id, region]) => ({
+          id,
+          points: region.points.reduce((acc, point) => [...acc, ...point], []),
+          isDragging: false,
+          enabled: region.enabled,
+          padding: region.padding
+        }));
+        console.log('Loaded regions:', loadedRegions);
+        setRegions(loadedRegions);
       }
-    };
-    
-    loadInitialConfig();
-  }, []);
+    } catch (error) {
+      console.error('Error loading config:', error);
+    }
+  };
 
   const handleMouseDown = (e) => {
     if (!isDrawing) return;
     const stage = e.target.getStage();
     const pos = stage.getPointerPosition();
-    
+
     // 檢查是否靠近起始點
     if (currentRegion.length >= 6) { // 至少有3個點
       const startX = currentRegion[0];
@@ -63,13 +59,13 @@ function RegionEditor() {
       const distance = Math.sqrt(
         Math.pow(pos.x - startX, 2) + Math.pow(pos.y - startY, 2)
       );
-      
+
       if (distance < 20) { // 距離閾值，可調整
         finishRegion();
         return;
       }
     }
-    
+
     setCurrentRegion([...currentRegion, pos.x, pos.y]);
   };
 
@@ -86,7 +82,7 @@ function RegionEditor() {
       const distance = Math.sqrt(
         Math.pow(pos.x - startX, 2) + Math.pow(pos.y - startY, 2)
       );
-      
+
       if (distance < 20) {
         stage.container().style.cursor = 'pointer';
       }
@@ -139,7 +135,7 @@ function RegionEditor() {
       for (let i = 0; i < region.points.length; i += 2) {
         points.push([region.points[i], region.points[i + 1]]);
       }
-      
+
       acc[region.id] = {
         points,
         padding: region.padding,
@@ -150,34 +146,51 @@ function RegionEditor() {
 
     const newConfig = { zones: zonesConfig };
     const success = await saveConfig(newConfig);
-    
+
     setSaveStatus(success ? 'saved' : 'error');
     setTimeout(() => setSaveStatus(''), 2000);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between mb-4">
-        <div className="space-x-2">
-          <button
-            onClick={() => setIsDrawing(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            disabled={isDrawing}
-          >
-            開始繪製區域
-          </button>
-          <button
-            onClick={saveRegions}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-          >
-            保存配置
-          </button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div className="flex justify-between items-center">
+          <div className="space-x-4">
+            <button
+              onClick={() => setIsDrawing(true)}
+              disabled={isDrawing}
+              className={`px-6 py-2 rounded-lg transition-colors duration-200 shadow-md
+                        ${isDrawing 
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}
+            >
+              開始繪製區域
+            </button>
+            <button
+              onClick={saveRegions}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg 
+                       transition-colors duration-200 shadow-md"
+            >
+              保存配置
+            </button>
+            <button
+              onClick={loadInitialConfig}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg 
+                       transition-colors duration-200 shadow-md"
+            >
+              默認標注
+            </button>
+          </div>
           {saveStatus && (
-            <span className={`ml-2 ${
-              saveStatus === 'saved' ? 'text-green-600' : 'text-red-600'
+            <span className={`ml-4 font-medium ${
+              saveStatus === 'saved' 
+                ? 'text-green-600' 
+                : saveStatus === 'saving' 
+                  ? 'text-yellow-600' 
+                  : 'text-red-600'
             }`}>
-              {saveStatus === 'saving' ? '保存中...' :
-               saveStatus === 'saved' ? '保存成功' : '保存失敗'}
+              {saveStatus === 'saving' ? 'Saving...' :
+               saveStatus === 'saved' ? 'Saved Successfully' : 'Save Failed'}
             </span>
           )}
         </div>

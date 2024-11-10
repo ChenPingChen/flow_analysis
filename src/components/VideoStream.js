@@ -33,12 +33,12 @@ function VideoStream() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
+    <div className="container mx-auto px-4 py-8">
+      <div className="relative bg-white rounded-xl shadow-lg overflow-hidden">
         {videoUrl ? (
           <video
             ref={videoRef}
-            className="w-full h-auto rounded-lg shadow-lg"
+            className="w-full h-auto rounded-lg"
             controls
             autoPlay
             src={videoUrl}
@@ -46,14 +46,16 @@ function VideoStream() {
             Your browser does not support the video tag.
           </video>
         ) : (
-          <div className="w-full h-[400px] bg-gray-200 rounded-lg shadow-lg flex items-center justify-center">
-            <p className="text-gray-500">等待影像輸入...</p>
+          <div className="w-full h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">
+            <p className="text-gray-500 text-lg">Waiting for video input...</p>
           </div>
         )}
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <canvas ref={canvasRef} className="hidden" />
         <button
           onClick={captureFrame}
-          className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          className="absolute top-4 right-4 bg-indigo-600 text-white px-6 py-2 rounded-lg 
+                   hover:bg-indigo-700 transition-colors duration-200 shadow-md
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
           Edit Regions
         </button>
